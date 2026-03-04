@@ -1,10 +1,10 @@
-
 window.onload = function () {
 
     let fullName = document.getElementById('fullName');
     let userName = document.getElementById('userName');
     let password = document.getElementById('password');
     let repeatPassword = document.getElementById('repeatPassword');
+    let checkbox = document.getElementById('checkbox');
     let buttonOk = document.getElementById('closePopup');
     let link = document.getElementById('link');
     let buttonSignUp = document.getElementById('button');
@@ -20,11 +20,18 @@ window.onload = function () {
     function clearError() {
 
         labelInputs.forEach(input => {
-            input.style.cssText = 'border: none; border-bottom: 1px solid #C6C6C4';
+            input.classList.remove('border-error');
+            // input.style.border = '';
         });
-        inputsError.forEach(div => {
-            div.innerText = '';
+        inputsError.forEach(span => {
+            span.innerText = '';
         });
+    }
+
+    function emptyInput(valueElement) {
+        valueElement.nextElementSibling.textContent = `Заполните поле ${valueElement.parentElement.innerText}!`;
+        valueElement.classList.add('border-error');
+        // return true;
     }
 
     //Проверка полей формы
@@ -34,71 +41,62 @@ window.onload = function () {
         clearError();
 
         if (!fullName.value) {
-            fullName.nextElementSibling.textContent = `Заполните поле ${fullName.parentElement.innerText}!`;
-            fullName.style.border = '1px solid red';
+            emptyInput(fullName);
             hasError = true;
-            // return;
         } else {
             let condition = /^[a-z\s]+$/i;
             if (!condition.test(fullName.value)) {
                 fullName.nextElementSibling.textContent = `Поле ${fullName.parentElement.innerText} может содержать только буквы и пробелы!`;
-                fullName.style.border = '1px solid red';
+                fullName.classList.add('border-error');
                 hasError = true;
             }
         }
 
         if (!userName.value) {
-            userName.nextElementSibling.textContent = `Заполните поле ${userName.parentElement.innerText}!`;
-            userName.style.border = '1px solid red';
+            emptyInput(userName);
             hasError = true;
-            // return;
         } else {
             let condition = /^[a-z0-9_-]+$/i;
             if (!condition.test(userName.value)) {
                 userName.nextElementSibling.textContent = `Поле ${userName.parentElement.innerText} может содержать только буквы, цифры, символ подчеркивания и тире!`;
-                userName.style.border = '1px solid red';
+                userName.classList.add('border-error');
                 hasError = true;
             }
         }
 
         if (!email.value) {
-            email.nextElementSibling.textContent = `Заполните поле ${email.parentElement.innerText}!`;
-            email.style.border = '1px solid red';
+            emptyInput(email);
             hasError = true;
-            // return;
         } else {
             let condition = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
             if (!condition.test(email.value)) {
                 email.nextElementSibling.textContent = `Поле ${email.parentElement.innerText} заполнено некорректно!`;
-                email.style.border = '1px solid red';
+                email.classList.add('border-error');
                 hasError = true;
             }
         }
 
         if (!password.value) {
-            password.nextElementSibling.textContent = `Заполните поле ${password.parentElement.innerText}!`;
-            password.style.border = '1px solid red';
+            emptyInput(password);
             hasError = true;
-            // return;
         } else {
             let condition = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=])[A-Za-z\d!@#$%^&*()_\-+=]{8,}$/;
             if (!condition.test(password.value)) {
-                password.nextElementSibling.textContent = `Поле ${password.parentElement.innerText} заполнено некорректно!`;
-                password.style.border = '1px solid red';
+                password.nextElementSibling.textContent = `Поле ${password.parentElement.innerText} должно содержать минимум 8 символов,
+                 хотя бы одна букву в верхнем регистре, хотя бы одну цифру, хотя бы один спецсимвол!`;
+                password.classList.add('border-error');
                 hasError = true;
             }
         }
 
         if (!repeatPassword.value) {
-            repeatPassword.nextElementSibling.textContent = `Заполните поле ${repeatPassword.parentElement.innerText}!`;
-            repeatPassword.style.border = '1px solid red';
+            emptyInput(repeatPassword);
             hasError = true;
-            // return;
         } else {
             if (password.value !== repeatPassword.value) {
                 repeatPassword.nextElementSibling.textContent = `Поле ${repeatPassword.parentElement.innerText}
                  должен совпадать с полем ${password.parentElement.innerText}!`;
-                repeatPassword.style.border = '1px solid red';
+                repeatPassword.classList.add('border-error');
                 hasError = true;
             }
         }
@@ -124,19 +122,30 @@ window.onload = function () {
             if (users) {
                 clients = JSON.parse(users);
             }
-            clients.push(newUser);
-            localStorage.setItem('users', JSON.stringify(clients));
+            let contact = clients.find(con => con.email === email.value);
 
+            //Проверка наличие уже зарегистрированного клиента по email
+            if (contact) {
+                email.nextElementSibling.textContent = `Клиент с таким email уже зарегистрирован!`;
+                email.classList.add('border-error');
 
-            let popup = document.getElementById('popup');
+            } else {
+                clients.push(newUser);
+                localStorage.setItem('users', JSON.stringify(clients));
 
-            // открытие попапа
-            popup.classList.add('active');
+                let popup = document.getElementById('popup');
 
-            // закрытие попапа
-            buttonOk.onclick = function () {
-                popup.classList.remove('active');
+                // открытие попапа
+                popup.classList.add('active');
+
+                // закрытие попапа
+                buttonOk.onclick = function () {
+                    popup.classList.remove('active');
+                }
             }
+
+
+
         }
 
     }
@@ -155,7 +164,7 @@ window.onload = function () {
         fullName.parentElement.remove();
         email.parentElement.remove();
         repeatPassword.parentElement.remove();
-        document.getElementsByClassName('checkbox')[0].remove();
+        checkbox.parentElement.remove();
         buttonSignUp.innerText = 'Sign In';
         link.textContent = 'Registration';
         link.removeEventListener('click', goToLoginPage);
@@ -177,65 +186,38 @@ window.onload = function () {
         clearError();
 
         if (!userName.value) {
-            userName.nextElementSibling.textContent = `Заполните поле ${userName.parentElement.innerText}!`;
-            userName.style.border = '1px solid red';
+            emptyInput(userName);
             hasError = true;
-        } else {
-            let condition = /^[a-z0-9_-]+$/i;
-            if (!condition.test(userName.value)) {
-                userName.nextElementSibling.textContent = `Поле ${userName.parentElement.innerText} может содержать только буквы и пробелы!`;
-                userName.style.border = '1px solid red';
-                hasError = true;
-            }
         }
 
         if (!password.value) {
-            password.nextElementSibling.textContent = `Заполните поле ${password.parentElement.innerText}!`;
-            password.style.border = '1px solid red';
+            emptyInput(password);
             hasError = true;
-            // return;
-        } else {
-            let condition = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=])[A-Za-z\d!@#$%^&*()_\-+=]{8,}$/;
-            if (!condition.test(password.value)) {
-                password.nextElementSibling.textContent = `Поле ${password.parentElement.innerText} заполнено некорректно!`;
-                password.style.border = '1px solid red';
-                hasError = true;
-            }
         }
 
 
         if (!hasError) {
             //Проверка клиента: зарегистрирован или нет
-            let clients = JSON.parse(localStorage.getItem('users'))
+            let clients = JSON.parse(localStorage.getItem('users')) || [];
             if (clients) {
                 let user = clients.find(us => us.userName === userName.value);
                 if (!user) {
                     userName.nextElementSibling.textContent = `Такой пользователь не зарегистрирован!`;
-                    userName.style.border = '1px solid red';
+                    userName.classList.add('border-error');
                 } else if (user.password !== password.value) {
                     password.nextElementSibling.textContent = `Неверный пароль!`;
-                    password.style.border = '1px solid red';
+                    password.classList.add('border-error');
                 } else {
-                    //Создание страницы Личный кабинет
-                    title.innerText = `Welcome, ${user.fullName}!`;
-                    buttonSignUp.innerText = 'Exit';
-                    buttonSignUp.removeEventListener('click', clickButtonSignIn);
-                    buttonSignUp.addEventListener('click', () => {
-                        location.reload();
-                    });
-                    link.parentElement.remove();
-                    userName.parentElement.remove();
-                    password.parentElement.remove();
-                    document.getElementsByClassName('form-text')[0].remove();
-                    // goToPersonalAccount ();
+                    goToPersonalAccount (user.fullName);
                 }
             }
         }
 
     }
 
-    function goToPersonalAccount () {
-        title.innerText = `Welcome, ${fullName.value}!`;
+    //Создание страницы Личный кабинет
+    function goToPersonalAccount(name) {
+        title.innerText = `Welcome, ${name}!`;
         buttonSignUp.innerText = 'Exit';
         buttonSignUp.removeEventListener('click', clickButtonSignIn);
         buttonSignUp.addEventListener('click', () => {
@@ -247,7 +229,6 @@ window.onload = function () {
         document.getElementsByClassName('form-text')[0].remove();
 
     }
-
 
 
 }

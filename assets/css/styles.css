@@ -72,6 +72,8 @@ body {
     font-family: "Nunito-Bold", sans-serif;
 }
 
+
+
 .checkbox {
     display: inline-block;
     font-size: 16px;
@@ -154,4 +156,10 @@ body {
     font-size: 10px;
     color: red;
     line-height: 1;
+}
+
+
+
+.border-error {
+    border: 1px solid red !important;
 }
